@@ -9,6 +9,7 @@ import ReactStars from 'react-rating-stars-component';
 import Swal from 'sweetalert2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMagnifyingGlass, faHeart } from '@fortawesome/free-solid-svg-icons'
+import { address } from './Uri';
 
 function App() {
   const [books, setBooks] = useState([
@@ -76,7 +77,7 @@ function App() {
   }
 
   const getFavBookList = () => {
-    axios.get(`https://travelio-books-api.herokuapp.com/fav/list`)
+    axios.get(`${address}fav/list`)
     .then(res => {
       let arrayofBooksResponse = []
       res.data.forEach(val => {
@@ -90,7 +91,6 @@ function App() {
           ammountFav: val.ammountFav
         })
       })
-      console.log(arrayofBooksResponse);
       setFavBooks(arrayofBooksResponse)
     }).catch(err => console.log(err))
   }
@@ -121,14 +121,11 @@ function App() {
     }
   }
 
-  const saveToFav = async (bookObject) => {
+  const saveToFav = (bookObject) => {
     axios({
       method: 'post',
-      url: 'https://travelio-books-api.herokuapp.com/fav/record',
-      data: bookObject,
-      headers: {
-        "Content-Type": "application/json"
-      }
+      url: `${address}fav/record`,
+      data: bookObject
     }).then((res) => {
       Swal.fire({
         position: 'top',
@@ -187,7 +184,7 @@ function App() {
     return favBooks.map((val, ind) => {
       return (
         <div key={ind} class="column is-3">
-          <div class="card" onClick={() => saveToFav(val)}>
+          <div class="card">
             <div class="card-image">
               <figure class="image" style={{overflow: 'hidden', width: '100%', height: '150px'}}>
                 <img style={{objectFit: 'cover'}} src={val.thumbnail} alt="" />
