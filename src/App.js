@@ -10,6 +10,8 @@ import Swal from 'sweetalert2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMagnifyingGlass, faHeart } from '@fortawesome/free-solid-svg-icons'
 import { address } from './Uri';
+import LoadingOverlay from 'react-loading-overlay';
+import { Circles } from  'react-loader-spinner'
 
 function App() {
   const [books, setBooks] = useState([
@@ -33,6 +35,7 @@ function App() {
     }
   ])
   const [tab, setTab] = useState(0)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     axios.get(`https://www.googleapis.com/books/v1/volumes?q=a`)
@@ -122,11 +125,13 @@ function App() {
   }
 
   const saveToFav = (bookObject) => {
+    setLoading(true)
     axios({
       method: 'post',
       url: `${address}fav/record`,
       data: bookObject
     }).then((res) => {
+      setLoading(false)
       Swal.fire({
         position: 'top',
         icon: 'success',
@@ -228,7 +233,7 @@ function App() {
   }
 
   const changeTab = (ind) => {
-    if (ind == 0) {
+    if (ind === 0) {
       getBookListBySearch("a")
     } else {
       getFavBookList()
@@ -237,42 +242,45 @@ function App() {
   }
 
   return (
-    <article class="panel is-danger" style={{backgroundColor: '#ededed'}}>
-      <div style={{ position: 'sticky', top: 0, zIndex: '3'}}>
-        <p class="panel-heading">
-          Travelio Books App
-        </p>
-        <p class="panel-tabs" style={{backgroundColor: 'white'}}>
-          <a onClick={() => changeTab(0)}>All</a>
-          <a onClick={() => changeTab(1)}>Favourite</a>
-        </p>
-        {
-          tab === 0 ?
-          <div class="panel-block" style={{backgroundColor: 'white'}}>
-            <p class="control has-icons-left">
-              <input onPaste={(e) => searchBooks(e)} onChange={(e) => searchBooks(e)} class="input is-danger" type="text" placeholder="Search" />
-              <span class="icon is-left">
-                <FontAwesomeIcon icon={faMagnifyingGlass} />
-              </span>
-            </p>
-          </div>
-          :null
-        }
-      </div>
-
-      <div class="container mt-5">
-        <div class="columns is-multiline">
-        {
-          tab === 0 ?
-          bookList()
-          :
-          favBookList()
-        }
+    <LoadingOverlay active={loading ? true : false} spinner text='Loading...'>
+      <article class="panel is-danger" style={{boxShadow: 'none'}}>
+        <div style={{ position: 'sticky', top: 0, zIndex: '3'}}>
+          <p class="panel-heading">
+            Travelio Books App
+          </p>
+          <p class="panel-tabs" style={{backgroundColor: 'white'}}>
+            <a onClick={() => changeTab(0)}>All</a>
+            <a onClick={() => changeTab(1)}>Favourite</a>
+          </p>
+          {
+            tab === 0 ?
+            <div class="panel-block" style={{backgroundColor: 'white'}}>
+              <p class="control has-icons-left">
+                <input onPaste={(e) => searchBooks(e)} onChange={(e) => searchBooks(e)} class="input is-danger" type="text" placeholder="Search" />
+                <span class="icon is-left">
+                  <FontAwesomeIcon icon={faMagnifyingGlass} />
+                </span>
+              </p>
+            </div>
+            :null
+          }
         </div>
-      </div>
-    
-      
-    </article>
+
+        <div class="container mt-5">
+          <div class="columns is-multiline" style={{ minHeight: "100vh", justifyContent: favBooks[0]._id == null ? 'center' : 'normal' }}>
+          {
+            tab === 0 ?
+            bookList()
+            :
+              favBooks[0]._id == null ?
+              <div style={{display: 'flex', position: 'relative', alignItems: 'center'}}><Circles height="100" width="100" color='red' ariaLabel='loading' /></div>
+              :
+              favBookList()
+          }
+          </div>
+        </div>
+      </article>
+    </LoadingOverlay>
   );
 }
 
