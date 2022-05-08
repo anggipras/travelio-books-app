@@ -36,6 +36,7 @@ function App() {
   ])
   const [tab, setTab] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [favLoading, setFavLoading] = useState(false)
 
   useEffect(() => {
     axios.get(`https://www.googleapis.com/books/v1/volumes?q=a`)
@@ -80,6 +81,7 @@ function App() {
   }
 
   const getFavBookList = () => {
+    setFavLoading(true)
     axios.get(`${address}fav/list`)
     .then(res => {
       let arrayofBooksResponse = []
@@ -94,6 +96,7 @@ function App() {
           ammountFav: val.ammountFav
         })
       })
+      setFavLoading(false)
       setFavBooks(arrayofBooksResponse)
     }).catch(err => console.log(err))
   }
@@ -267,12 +270,12 @@ function App() {
         </div>
 
         <div class="container mt-5">
-          <div class="columns is-multiline" style={{ minHeight: "100vh", justifyContent: favBooks[0]._id == null ? 'center' : 'normal' }}>
+          <div class="columns is-multiline" style={{ minHeight: "100vh", justifyContent: favLoading ? 'center' : 'normal' }}>
           {
             tab === 0 ?
             bookList()
             :
-              favBooks[0]._id == null ?
+              favLoading ?
               <div style={{display: 'flex', position: 'relative', alignItems: 'center'}}><Circles height="100" width="100" color='red' ariaLabel='loading' /></div>
               :
               favBookList()
